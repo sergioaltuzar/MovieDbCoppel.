@@ -1,0 +1,108 @@
+//
+//  SearchMoviesProtocols.swift
+//  MovieDBCoppel
+//
+//  Created by Sergio on 2/16/23.
+//  Copyright © 2023 Sergio. All rights reserved.
+//
+
+import UIKit
+import UpcomingMoviesDomain
+
+protocol SearchMoviesCoordinatorProtocol: AnyObject {
+
+    func embedSearchOptions(on parentViewController: UIViewController,
+                            in containerView: UIView) -> SearchOptionsViewController
+
+    func embedSearchController(on parentViewController: SearchMoviesResultControllerDelegate) -> SearchController
+
+    func showMovieDetail(for movie: Movie)
+    func showMovieDetail(for movieId: Int, and movieTitle: String)
+    func showMoviesByGenre(_ genreId: Int, genreName: String)
+    func showDefaultSearchOption(_ option: DefaultSearchOption)
+
+}
+
+// MARK: - Search movies result
+
+protocol SearchMoviesResultViewModelProtocol {
+
+    var viewState: AnyBehaviorBindable<SearchMoviesResultViewState> { get }
+
+    var recentSearchCells: [RecentSearchCellViewModelProtocol] { get }
+    var movieCells: [MovieListCellViewModelProtocol] { get }
+
+    func loadRecentSearches()
+
+    func searchMovies(withSearchText searchText: String)
+    func searchedMovie(at index: Int) -> Movie
+
+    func clearMovies()
+
+}
+
+protocol SearchMoviesResultInteractorProtocol {
+
+    var didUpdateMovieSearches: (() -> Void)? { get set }
+
+    func searchMovies(searchText: String, page: Int?, completion: @escaping (Result<[Movie], Error>) -> Void)
+
+    func getMovieSearches(limit: Int?,
+                          completion: @escaping (Result<[MovieSearch], Error>) -> Void)
+    func saveSearchText(_ searchText: String, completion: ((Result<Void, Error>) -> Void)?)
+
+}
+
+// MARK: - Search options
+
+protocol SearchOptionsViewModelProtocol {
+
+    var viewState: BehaviorBindable<SearchOptionsViewState> { get }
+    var needsContentReload: PublishBindable<Void> { get }
+    var updateVisitedMovies: PublishBindable<Int> { get }
+
+    var selectedDefaultSearchOption: PublishBindable<DefaultSearchOption> { get }
+    var selectedMovieGenre: PublishBindable<(Int, String)> { get }
+    var selectedRecentlyVisitedMovie: PublishBindable<(Int, String)> { get }
+
+    var visitedMovieCells: [VisitedMovieCellViewModelProtocol] { get }
+    var genreCells: [GenreSearchOptionCellViewModelProtocol] { get }
+
+    var defaultSearchOptionsCells: [DefaultSearchOptionCellViewModelProtocol] { get }
+
+    func loadGenres()
+    func loadVisitedMovies()
+
+    func section(at index: Int) -> SearchOptionsSection
+    func sectionIndex(for section: SearchOptionsSection) -> Int?
+
+    func buildRecentlyVisitedMoviesCell() -> RecentlyVisitedMoviesCellViewModelProtocol
+
+    func getDefaultSearchSelection(by index: Int)
+    func getMovieGenreSelection(by index: Int)
+    func getRecentlyVisitedMovieSelection(by index: Int)
+
+}
+
+protocol SearchOptionsInteractorProtocol {
+
+    var didUpdateMovieVisit: (() -> Void)? { get set }
+
+    func getGenres(completion: @escaping (Result<[Genre], Error>) -> Void)
+    func getMovieVisits(completion: @escaping (Result<[MovieVisit], Error>) -> Void)
+
+}
+
+protocol SearchOptionsViewControllerDelegate: UIViewController {
+
+    func searchOptionsViewController(_ searchOptionsViewController: SearchOptionsViewController,
+                                     didSelectDefaultSearchOption option: DefaultSearchOption)
+
+    func searchOptionsViewController(_ searchOptionsViewController: SearchOptionsViewController,
+                                     didSelectMovieGenreWithId genreId: Int, andGenreName genreName: String)
+
+    func searchOptionsViewController(_ searchOptionsViewController: SearchOptionsViewController,
+                                     didSelectRecentlyVisitedMovie id: Int,
+                                     title: String)
+
+}

@@ -1,0 +1,39 @@
+//
+//  MovieListProtocols.swift
+//  MovieDBCoppel
+//
+//  Created by Sergio on 2/16/23.
+//  Copyright © 2023 Sergio. All rights reserved.
+//
+
+import UIKit
+import UpcomingMoviesDomain
+
+protocol MovieListViewModelProtocol {
+
+    var viewState: AnyBehaviorBindable<MovieListViewState> { get }
+    var startLoading: AnyBehaviorBindable<Bool> { get }
+
+    var needsPrefetch: Bool { get }
+
+    var displayTitle: String? { get set }
+    var movieCells: [MovieListCellViewModelProtocol] { get }
+
+    func getMovies()
+    func refreshMovies()
+
+    func selectedMovie(at index: Int) -> Movie
+
+}
+
+protocol MoviesInteractorProtocol {
+
+    func getMovies(page: Int, completion: @escaping (Result<[UpcomingMoviesDomain.Movie], Error>) -> Void)
+
+}
+
+protocol MovieListCoordinatorProtocol: AnyObject {
+
+    func showMovieDetail(for movie: Movie)
+
+}

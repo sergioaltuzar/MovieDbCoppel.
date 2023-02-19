@@ -1,0 +1,107 @@
+//
+//  MovieDetailProtocols.swift
+//  MovieDBCoppel
+//
+//  Created by Sergio on 2/16/23.
+//  Copyright © 2023 Sergio. All rights reserved.
+//
+
+import UIKit
+import UpcomingMoviesDomain
+
+protocol MovieDetailViewModelProtocol {
+
+    var id: Int { get }
+    var title: String { get }
+    var releaseDate: String? { get }
+    var overview: String? { get }
+    var voteAverage: Double? { get }
+    var posterURL: URL? { get }
+    var backdropURL: URL? { get }
+
+    var screenTitle: String { get }
+    var shareTitle: String { get }
+
+    var startLoading: AnyBehaviorBindable<Bool> { get }
+    var showGenreName: AnyBehaviorBindable<String> { get }
+    var showMovieOptions: AnyBehaviorBindable<[MovieDetailOption]> { get }
+    var didSetupMovieDetail: AnyBehaviorBindable<Bool> { get }
+    var showSuccessAlert: AnyPublishBindable<String> { get }
+    var showErrorAlert: AnyPublishBindable<Error> { get }
+    var showErrorRetryView: AnyPublishBindable<Error> { get }
+    var didSelectShareAction: AnyPublishBindable<Bool> { get }
+    var movieAccountState: AnyBehaviorBindable<MovieAccountStateModel?> { get }
+
+    func getAvailableAlertActions() -> [MovieDetailActionModel]
+
+    /**
+     * Retrieves movie detail information.
+     * - Parameters:
+     *      - showLoader: Indicates if loader should be triggered or not.
+     */
+    func getMovieDetail(showLoader: Bool)
+
+    /**
+     * Saves currently presented movie detail as a visited movie.
+     */
+    func saveVisitedMovie()
+
+    /**
+     * Checks the movie account state: if it is included in favorites or watchlist.
+     */
+    func checkMovieAccountState()
+
+    /**
+     * Marks a movie as a favorite or non-favorite given the current favorite state of the presented movie.
+     */
+    func handleFavoriteMovie()
+
+}
+
+protocol MovieDetailInteractorProtocol {
+
+    func isUserSignedIn() -> Bool
+
+    func findGenre(with id: Int, completion: @escaping (Result<Genre?, Error>) -> Void)
+
+    func getMovieDetail(for movieId: Int, completion: @escaping (Result<Movie, Error>) -> Void)
+
+    func getMovieAccountState(for movieId: Int,
+                              completion: @escaping (Result<Movie.AccountState, Error>) -> Void)
+
+    func markMovieAsFavorite(movieId: Int, favorite: Bool, completion: @escaping (Result<Bool, Error>) -> Void)
+
+    func addToWatchlist(movieId: Int, completion: @escaping (Result<Bool, Error>) -> Void)
+
+    func removeFromWatchlist(movieId: Int, completion: @escaping (Result<Bool, Error>) -> Void)
+
+    func saveMovieVisit(with id: Int, title: String, posterPath: String?)
+
+}
+
+protocol MovieDetailFactoryProtocol {
+
+    var options: [MovieDetailOption] { get }
+
+}
+
+protocol MovieDetailCoordinatorProtocol: AnyObject {
+
+    func showMovieOption(_ option: MovieDetailOption)
+    func showSharingOptions(withShareTitle title: String)
+
+}
+
+protocol MovieDetailUIHelperProtocol {
+
+    func showHUD(with text: String, in view: UIView)
+
+    func showLoader(in view: UIView)
+    func hideLoader()
+
+    func presentRetryView(in view: UIView,
+                          with errorMessage: String?,
+                          retryHandler: @escaping () -> Void)
+    func hideRetryView()
+
+}
